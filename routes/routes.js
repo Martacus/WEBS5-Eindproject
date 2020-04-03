@@ -1,4 +1,13 @@
+var redditAPI = require('../api/reddit');
+var pollController = require("../controller/pollController");
+const specs = require("../config/swagger.js");
+const swaggerUi = require('swagger-ui-express');
+
 module.exports = function (app, passport) {
+  // ===================================== 
+  // DOCS ================================
+  // =====================================
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs.default));
 
   // =====================================
   // HOME PAGE (with login links) ========
@@ -19,7 +28,7 @@ module.exports = function (app, passport) {
 
   // process the login form
   app.post('/login', passport.authenticate('local-login', {
-    successRedirect: '/profile', 
+    successRedirect: '/home', 
     failureRedirect: '/login', 
     failureFlash: true 
   }));
@@ -36,7 +45,7 @@ module.exports = function (app, passport) {
 
   // process the signup form
   app.post('/signup', passport.authenticate('local-signup', {
-    successRedirect: '/profile', // redirect to the secure profile section
+    successRedirect: '/home', // redirect to the secure profile section
     failureRedirect: '/signup', // redirect back to the signup page if there is an error
     failureFlash: true // allow flash messages
   }));
@@ -64,9 +73,71 @@ module.exports = function (app, passport) {
   // HOME ================================
   // =====================================
   app.get('/home', function (req, res) {
-    res.render('home.ejs');
+    redditAPI.getHomepage().then(function(data) {
+      handleRoute(data, "home.ejs", req.headers, res, { posts: data });
+    });
+  });
+
+  //Real API starts here
+  // =====================================
+  // POSTS ===============================
+  // =====================================
+  app.get('/post/:postid', function(req, res){
+    redditAPI.getPost(req.params.postid).then(function(data){
+      pollController.getPostPolls(data.name).then(function(pollData) {
+        data.polls = pollData;
+        handleRoute(data, "post.ejs", req.headers, res, { post: data });
+      });
+    });
+  });
+
+  // ===================================== 
+  // POLLS ===============================
+  // =====================================
+  app.get('/poll/:pollid', function(req, res){
+    pollController.getPoll({ pollId: req.params.pollid }).then(function(data) {
+      handleRoute(data, "poll.ejs", req.headers, res, { poll: data });
+    });
+  });
+
+  app.get("/poll", function(req, res) {
+    pollController.getPoll(req.query).then(function(data) {
+      handleRoute(data, "poll.ejs", req.headers, res, { poll: data });
+    });
+  });
+
+  app.post('/poll', function(req, res){
+    pollController.newPoll(req.body);
+    res.end();
+  });
+
+  // ===================================== 
+  // ANSWERS =============================
+  // =====================================
+  app.get('/poll/:pollid/answer/:answerid', function(req, res){
+    pollController.getAnswer({ pollId: req.params.pollid, answerId: req.params.answerid }).then(function(data){
+      handleRoute(data, 'answer.ejs', req.headers, res, {answer: data});
+    });
+  });
+
+  app.get("/answer", function(req, res) {
+    pollController
+      .getAnswer(req.query)
+      .then(function(data) {
+        handleRoute(data, "answer.ejs", req.headers, res, { answer: data });
+      });
   });
 };
+
+
+//Handles routes by json or html
+function handleRoute(data, view, headers, res, sendData){
+  if (headers.type === "json") {
+    res.json(data);
+  } else {
+    res.render(view, sendData);
+  }
+}
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
