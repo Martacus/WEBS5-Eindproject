@@ -9,6 +9,14 @@ module.exports = function (app, passport) {
   // =====================================
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs.default));
 
+  // ===================================== 
+  // SOCK ================================
+  // =====================================  
+  app.get("/socket", function(req, res) {
+    res.render("socket.ejs");
+  });
+
+
   // =====================================
   // HOME PAGE (with login links) ========
   // =====================================
@@ -118,6 +126,14 @@ module.exports = function (app, passport) {
     pollController.getAnswer({ pollId: req.params.pollid, answerId: req.params.answerid }).then(function(data){
       handleRoute(data, 'answer.ejs', req.headers, res, {answer: data});
     });
+  });
+
+  app.get("/poll/:pollid/answer/:answerid/user", function(req, res) {
+    pollController
+      .getAnswer({ pollId: req.params.pollid, answerId: req.params.answerid })
+      .then(function(data) {
+        handleRoute(data, "user.ejs", req.headers, res, { answer: data });
+      });
   });
 
   app.get("/answer", function(req, res) {

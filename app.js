@@ -12,6 +12,7 @@ var morgan = require('morgan');
 
 var app = express();
 
+
 // Database connection
 var configDB = require('./config/database.js');
 mongoose.connect(configDB.url);

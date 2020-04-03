@@ -7,16 +7,30 @@ var answerSchema = mongoose.Schema({
     type: String,
     default: function genUUID() {
       return uuid.v4();
-    }
+    },
+    required: true
   },
-  answer: String,
+  answer: {
+    type: String,
+    required: true,
+    maxlength: "50"
+  },
   votes: {
     type: Number,
-    min: 0,
-    default: 0
+    default: 0,
+    required: true
   },
-  pollId: String,
-  userId: String
+  pollId: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function(arr) {
+        return arr.length == 36;
+      },
+      message: "The UUID is not of the right length"
+    },
+    ref: "Poll"
+  }
 });
 
 module.exports = mongoose.model("Answer", answerSchema);
