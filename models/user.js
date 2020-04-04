@@ -25,8 +25,11 @@ var userSchema = mongoose.Schema({
     email: String,
     name: String
   },
-  role: String,
-  id: {
+  role: {
+    type: String,
+    required: true
+  },
+  userId: {
     type: String,
     default: function genUUID() {
       uuid.v4();

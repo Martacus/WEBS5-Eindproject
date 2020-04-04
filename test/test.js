@@ -12,6 +12,9 @@ var User = require('../models/user');
 var Answer = require('../models/answer');
 var Poll = require('../models/poll');
 
+//Reddit.js
+var redditjs = require('../api/reddit');
+
 var app = require('express')();
 require("../config/passport")(passport);
 // Passport Setup
@@ -74,6 +77,88 @@ describe("Testing models", function() {
       expect(error.message).to.not.be.undefined;
       done();
     });
+  });
+
+  describe('test polls', function(){
+    it("should not error", function(done) {
+      var poll = new Poll();
+      poll.name = "Test Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+
+      var error = poll.validateSync();
+      expect(error).to.be.undefined;
+      done();
+    });
+
+    it("saving poll works", function(done) {
+      var poll = new Poll();
+      poll.name = "Testing Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+
+      poll.save();
+
+      expect(Poll.findByUUID(poll.pollId)).to.not.be.undefined;
+      expect(Poll.findByPost(poll.postId)).to.not.be.undefined;
+
+      Poll.deleteOne({pollId: poll.pollId});
+
+      done();
+    });
+  });
+
+  describe("test user", function() {
+    it("should not error", function(done) {
+      var poll = new Poll();
+      poll.name = "Test Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+
+      var error = poll.validateSync();
+      expect(error).to.be.undefined;
+      done();
+    });
+
+    it("saving poll works", function(done) {
+      var poll = new Poll();
+      poll.name = "Testing Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+
+      poll.save();
+
+      expect(Poll.findByUUID(poll.pollId)).to.not.be.undefined;
+      expect(Poll.findByPost(poll.postId)).to.not.be.undefined;
+
+      Poll.deleteOne({ pollId: poll.pollId });
+
+      done();
+    });
+  });
+
+  describe("test redditjs", function() {
+    it("GetHomePage should not be null", function(done) {
+      var homepageData = redditjs.getHomepage();
+      expect(homepageData).to.not.be.undefined;
+      done();
+    });
+
+    // it("GetPost with random should error", async function(done) {
+    //   var homepageData = await redditjs
+    //     .getPost("random")
+    //     .then(result => result.data);
+    //   console.log('LALLA GETS GERE');
+    //   expect(homepageData).to.not.be.undefined;
+    //   done();
+    // });
+
+    // it("GetPost with valid should be object", async function(done) {
+    //   var homepageData = {};
+    //   homepageData = await redditjs.getPost("t3_fqhrut");
+    //   expect(homepageData).to.not.be.undefined;
+    //   done();
+    // });
   });
 });
 

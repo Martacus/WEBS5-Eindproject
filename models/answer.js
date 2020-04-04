@@ -18,7 +18,8 @@ var answerSchema = mongoose.Schema({
   votes: {
     type: Number,
     default: 0,
-    required: true
+    required: true,
+    min: 0
   },
   pollId: {
     type: String,

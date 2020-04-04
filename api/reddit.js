@@ -9,7 +9,7 @@ module.exports.getHomepage = async function() {
     const json = await response.json();
     return frontPageToPosts(json);
   } catch (error) {
-    console.log(error);
+    return error;
   }
 };
 
@@ -20,37 +20,45 @@ module.exports.getPost = async function(postName){
     const json = await response.json();
     return getPostData(json);
   } catch(error) {
-    console.log(error);
+    return error;
   }
 }
 
 function frontPageToPosts(data){
-  var postarray = [];
-  var childrenArray =  data['data']['children'];
-  for (index = 0; index < childrenArray.length; index++) {
-    var dataObject = childrenArray[index]["data"];
+  try{
+    var postarray = [];
+    var childrenArray = data["data"]["children"];
+    for (index = 0; index < childrenArray.length; index++) {
+      var dataObject = childrenArray[index]["data"];
 
-    var returnObject = {};
-    returnObject.subreddit =  dataObject['subreddit'];
-    returnObject.title =  dataObject['title'];
-    returnObject.url = dataObject['url'];
-    returnObject.id = dataObject['id'];
-    returnObject.name = dataObject['name'];
+      var returnObject = {};
+      returnObject.subreddit = dataObject["subreddit"];
+      returnObject.title = dataObject["title"];
+      returnObject.url = dataObject["url"];
+      returnObject.id = dataObject["id"];
+      returnObject.name = dataObject["name"];
 
-    postarray.push(returnObject);
+      postarray.push(returnObject);
+    }
+    return postarray;
+  } catch(error){
+    return error;
   }
-  return postarray;
 }
 
 function getPostData(data){
-  var post = {};
-  var childrenArray = data['data']['children'];
-  var dataObject = childrenArray[0]["data"];
-  post.subreddit = dataObject['subreddit'];
-  post.title = dataObject['title'];
-  post.url = dataObject['url'];
-  post.id = dataObject['id'];
-  post.name = dataObject['name'];
+  try{
+    var post = {};
+    var childrenArray = data["data"]["children"];
+    var dataObject = childrenArray[0]["data"];
+    post.subreddit = dataObject["subreddit"];
+    post.title = dataObject["title"];
+    post.url = dataObject["url"];
+    post.id = dataObject["id"];
+    post.name = dataObject["name"];
 
-  return post;
+    return post;
+  } catch (error) {
+    return error;
+  }
 }

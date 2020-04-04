@@ -27,7 +27,6 @@
   <script>
     $(document).ready(function () {
       socket.on('counterupdate', function (msg) {
-        console.log('update recieved: ' + msg.counter);
         $('.counter').val(msg.counter);
       });
     });
