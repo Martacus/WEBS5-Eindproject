@@ -159,12 +159,12 @@ module.exports = function (app, passport) {
     });
   });
 
-  app.get("/poll/:pollid/answer/:answerid/user", function(req, res) {
+  app.get("/poll/:pollid/answer/:answerid/votes", function(req, res) {
     pollController
-      .getAnswer({ pollId: req.params.pollid, answerId: req.params.answerid })
+      .getVotes({ pollId: req.params.pollid, answerId: req.params.answerid })
       .then(function(data) {
-        handleRoute(data, "user.ejs", req.headers, res, { answer: data });
-      });
+        res.json(data);
+    });
   });
 
   app.get("/answer", function(req, res) {

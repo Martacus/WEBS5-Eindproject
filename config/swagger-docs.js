@@ -94,3 +94,29 @@
  *        200:
  *          description: Receive back the answer
  */
+
+    /**
+ * @swagger
+ * /poll/{pollid}/answer/{answerid}/votes:
+ *    get:
+ *      tags:
+ *          - Poll
+ *      summary: Retrieve the number of votes on a poll
+ *      description: This is where you can ask for the amount of poll votes.
+ *      consumes:
+ *        - string
+ *      parameters:
+ *        - name: pollid
+ *          in: path
+ *          required: true
+ *          schema:
+ *            type: string
+ *        - name: answerid
+ *          in: path
+ *          required: true
+ *          schema:
+ *            type: string
+ *      responses:
+ *        200:
+ *          description: Receive back the number of votes
+ */

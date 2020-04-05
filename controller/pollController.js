@@ -47,3 +47,8 @@ module.exports.getAnswer = async function(query) {
   });
   return answer;
 };
+
+module.exports.getVotes = async function(pollId) {
+  var poll = await Poll.find({pollId: query.pollId});
+  return { votes: poll.getVotes() };
+}
