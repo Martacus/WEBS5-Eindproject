@@ -30,6 +30,26 @@ app.use(flash());
 // load our routes and pass in our app and fully configured passport
 require('../routes/routes.js')(app, passport); 
 
+describe('Testing modules' ,async function() {
+  it('Poll has a module', () => {
+    expect(Poll).to.not.be.undefined;
+  });
+
+  it('User has a module', () => {
+    expect(Poll).to.not.be.undefined;
+  });
+
+  it('Answer has a module', () => {
+    expect(Poll).to.not.be.undefined;
+  });
+})
+
+describe('Testing users', async function(){
+  it('Has a module', () => {
+    expect(User).to.not.be.undefined;
+  });
+})
+
 describe('Testing reddit api', async function(){
   it('getHomePage should return object with filled array', async function(){
     await redditjs.getHomepage().then(data => {
