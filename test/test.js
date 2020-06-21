@@ -84,6 +84,7 @@ describe("Testing models", function() {
       var poll = new Poll();
       poll.name = "Test Poll";
       poll.postId = "yhhwhbifhui";
+      poll.userid = "testid"
       poll.answersAmount = 4;
 
       var error = poll.validateSync();
@@ -113,6 +114,7 @@ describe("Testing models", function() {
       var poll = new Poll();
       poll.name = "Test Poll";
       poll.postId = "yhhwhbifhui";
+      poll.userid = "testid"
       poll.answersAmount = 4;
 
       var error = poll.validateSync();
