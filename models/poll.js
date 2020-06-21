@@ -17,7 +17,10 @@ var pollSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  answers: [Answer.schema],
+  answers: {
+    type: [Answer.schema],
+    validate: [arrayValidate, "Exceeds the maximum amount of answers"]
+  },
   userid: {
     type: String,
     required: true
@@ -40,5 +43,10 @@ pollSchema.methods.getVotes = function(){
   }
   return votes;
 }
+
+function arrayValidate(array) {
+  return array.length <= 4;
+}
+
 
 module.exports = mongoose.model('Poll', pollSchema);

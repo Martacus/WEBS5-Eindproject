@@ -14,6 +14,7 @@ var Poll = require('../models/poll');
 
 //Reddit.js
 var redditjs = require('../api/reddit');
+const { assert } = require("chai");
 
 var app = require('express')();
 require("../config/passport")(passport);
@@ -46,7 +47,7 @@ describe('Testing poll routes', function(){
   })
 });
 
-describe("Testing models", function() {
+describe("Testing models", async function() {
   describe("test answers", function() {
     it("should return that the id is not long enough", function(done) {
       var answer = new Answer();
@@ -80,53 +81,12 @@ describe("Testing models", function() {
   });
 
   describe('test polls', function(){
-    it("should not error", function(done) {
-      var poll = new Poll();
-      poll.name = "Test Poll";
-      poll.postId = "yhhwhbifhui";
-      poll.userid = "testid"
-      poll.answersAmount = 4;
-
-      var error = poll.validateSync();
-      expect(error).to.be.undefined;
-      done();
-    });
-
-    it("saving poll works", function(done) {
+    it("Saving a poll should not error", function (done) {
       var poll = new Poll();
       poll.name = "Testing Poll";
       poll.postId = "yhhwhbifhui";
       poll.answersAmount = 4;
-
-      poll.save();
-
-      expect(Poll.findByUUID(poll.pollId)).to.not.be.undefined;
-      expect(Poll.findByPost(poll.postId)).to.not.be.undefined;
-
-      Poll.deleteOne({pollId: poll.pollId});
-
-      done();
-    });
-  });
-
-  describe("test user", function() {
-    it("should not error", function(done) {
-      var poll = new Poll();
-      poll.name = "Test Poll";
-      poll.postId = "yhhwhbifhui";
-      poll.userid = "testid"
-      poll.answersAmount = 4;
-
-      var error = poll.validateSync();
-      expect(error).to.be.undefined;
-      done();
-    });
-
-    it("saving poll works", function(done) {
-      var poll = new Poll();
-      poll.name = "Testing Poll";
-      poll.postId = "yhhwhbifhui";
-      poll.answersAmount = 4;
+      poll.userid = "user_id";
 
       poll.save();
 
@@ -137,30 +97,52 @@ describe("Testing models", function() {
 
       done();
     });
-  });
 
+    it("should not error", function(done) {
+      var poll = new Poll();
+      poll.name = "Test Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.userid = "testid"
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+
+      var error = poll.validateSync();
+      expect(error).to.be.undefined;
+      done();
+    });
+
+    it('Poll cannot have more than 4 answers', async function () {
+      var model = {
+        name: "Test Poll",
+        postId: "testid",
+        userid:"user_id",
+        answers: [
+          new Answer({ answer: "Answer 1", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" }),
+          new Answer({ answer: "Answer 2", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" }),
+          new Answer({ answer: "Answer 3", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" }),
+          new Answer({ answer: "Answer 4", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" }),
+          new Answer({ answer: "Answer 5", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" })
+        ]
+      };
+
+      var done = false;
+      await Poll.create(model, function (err, poll) {
+        if(err){
+          done = true;
+        }
+      });
+
+      assert.ok(done, "Poll has no errors");
+    });
+  });
+  
   describe("test redditjs", function() {
     it("GetHomePage should not be null", function(done) {
       var homepageData = redditjs.getHomepage();
       expect(homepageData).to.not.be.undefined;
       done();
     });
-
-    // it("GetPost with random should error", async function(done) {
-    //   var homepageData = await redditjs
-    //     .getPost("random")
-    //     .then(result => result.data);
-    //   console.log('LALLA GETS GERE');
-    //   expect(homepageData).to.not.be.undefined;
-    //   done();
-    // });
-
-    // it("GetPost with valid should be object", async function(done) {
-    //   var homepageData = {};
-    //   homepageData = await redditjs.getPost("t3_fqhrut");
-    //   expect(homepageData).to.not.be.undefined;
-    //   done();
-    // });
   });
+
 });
 

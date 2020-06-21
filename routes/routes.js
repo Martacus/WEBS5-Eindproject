@@ -174,26 +174,12 @@ module.exports = function (app, passport) {
     });
   });
 
-  app.get('/poll/:pollid/answer/:answerid', function(req, res){
-    pollController.getAnswer({ pollId: req.params.pollid, answerId: req.params.answerid }).then(function(data){
-      handleRoute(data, 'answer.ejs', req, res, {answer: data});
-    });
-  });
-
   app.get("/poll/:pollid/answer/:answerid/votes", function(req, res) {
     pollController
       .getVotes({ pollId: req.params.pollid, answerId: req.params.answerid })
       .then(function(data) {
         res.json(data);
     });
-  });
-
-  app.get("/answer", function(req, res) {
-    pollController
-      .getAnswer(req.query)
-      .then(function(data) {
-        handleRoute(data, "answer.ejs", req, res, { answer: data });
-      });
   });
 };
 
