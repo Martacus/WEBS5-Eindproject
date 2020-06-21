@@ -39,16 +39,22 @@ describe('Testing reddit api', async function(){
 
   it("getPost should return a post", async function () {
     await redditjs.getPost("t3_hd213b").then((data) => {
-      console.log(data);
+      expect(data).to.not.be.undefined;
+    });
+  });
+
+  it("getPost should not return a post", async function () {
+    await redditjs.getPost("t3_hd213bygjfhgjfjgf").then((data) => {
+      expect(data).to.be.string;
     });
   });
 });
 
-describe('Testing poll routes', function(){
-  describe('without params', function(){
-    it('should return an object', function(done){
+describe("Testing poll routes", function () {
+  describe("without params", function () {
+    it("should return an object", function (done) {
       chai
-        .request('http://localhost:3000')
+        .request("http://localhost:3000")
         .get("/poll")
         .set("type", "json")
         .end((err, res) => {
@@ -61,7 +67,26 @@ describe('Testing poll routes', function(){
           done();
         });
     });
-  })
+  });
+
+  describe("test poll rules", async function () {
+    it("Post cannot have multiple polls from the same user", async function () {
+      try {
+         await pollController.newPoll(
+           {
+             name: "Poll Test 1",
+             postId: "post_test_id",
+             answersAmount: 4,
+             userid: "5eef232f34aa2c57f0a9666c",
+             answers: ["Answer 2", "Answer 3", "Answer 4", "Answer 1"],
+           },
+           { _id: "5eef232f34aa2c57f0a9666c" }
+         );
+      } catch (err) {
+        console.log(err);
+      }
+    });
+  });
 });
 
 describe("Testing models", async function() {
@@ -171,28 +196,7 @@ describe("Testing models", async function() {
       assert.ok(done, "Poll has no errors");
     });
 
-    it("Post cannot have multiple polls from the same user", async function () {
-      var poll = new Poll();
-      poll.name = "Poll 1";
-      poll.postId = "yhhwhbifhui";
-      poll.answersAmount = 4;
-      poll.userid = "user_id";
-
-      var poll2 = new Poll();
-      poll.name = "Poll 2";
-      poll.postId = "yhhwhbifhui";
-      poll.answersAmount = 4;
-      poll.userid = "user_id";
-
-      var done = false;
-      await Poll.create([poll, poll2], function (err, doc) {
-        if (err) {
-          done = true;
-        }
-
-        assert.ok(done, "Poll has no errors");
-      });
-    });
+    
   });
   
   describe("test redditjs", function() {

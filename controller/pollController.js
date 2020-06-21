@@ -2,9 +2,26 @@ var Poll = require("../models/poll");
 var Answer = require("../models/answer");
 const { use } = require("chai");
 
-module.exports.newPoll = function(data, user){
+module.exports.newPoll = async function(data, user, callback){
+  console.log("auokay")
+  var polls = await Poll.findByPostAndUser(data.postId, user._id).then((result) => {
+    if(result){
+      
+    }
+  });
+
+  if(polls.length > 0){
+    console.log("THIS IS ANAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    if(typeof callback === 'function'){
+      callback({
+        error: "This user already has a poll under post: " + data.postId,
+      });
+    }
+    return;
+  }
+
   var poll = new Poll();
-  poll.name = data.postTitle;
+  poll.name = data.name;
   poll.postId = data.postId;
   poll.userid = user._id;
 
@@ -31,7 +48,7 @@ module.exports.newPoll = function(data, user){
 
   poll.answers.forEach(answer => {
     answer.pollId = poll.pollId;
-    answer.save(function (err) {
+    answer.save({ suppressWarning: true },function (err) {
       if (err) throw err;
     });
   })
