@@ -144,6 +144,36 @@ module.exports = function (app, passport) {
   // ===================================== 
   // ANSWERS =============================
   // =====================================
+  app.get('/user/:userid/poll/:pollid/answer/:answerid', function (req, res) {
+    pollController.getPollByUser(req.params.userid, req.params.pollid).then(function (data) {
+      if (data === null || data === undefined) {
+        res.json({ error: "No poll was found" });
+      }
+      else {
+        data.answers.forEach(element => {
+          if (element.answerId === req.params.answerid){
+            res.json(element);
+            next();
+          }
+        });
+        res.json({error: "Answer was not found"});
+        next();
+      }
+    });
+  });
+
+  app.get('/user/:userid/poll/:pollid/answers', function (req, res) {
+    pollController.getPollByUser(req.params.userid, req.params.pollid).then(function (data) {
+      if (data === null || data === undefined) {
+        res.json({ error: "No poll was found" });
+      }
+      else {
+        res.json(data.answers);
+        next();
+      }
+    });
+  });
+
   app.get('/poll/:pollid/answer/:answerid', function(req, res){
     pollController.getAnswer({ pollId: req.params.pollid, answerId: req.params.answerid }).then(function(data){
       handleRoute(data, 'answer.ejs', req, res, {answer: data});
