@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "nyc mocha --exit",
+    "test": "mocha --recursive --exit",
     "coverage": "nyc npm run test"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
     "express-session": "^1.17.0",
     "jquery": "^3.4.1",
     "method-override": "~2.3.6",
+    "mocha": "^8.0.1",
     "mongoose": "^5.9.7",
     "morgan": "^1.10.0",
     "node-fetch": "^2.6.0",
