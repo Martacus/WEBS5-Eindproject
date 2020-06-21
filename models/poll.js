@@ -23,7 +23,8 @@ var pollSchema = mongoose.Schema({
   },
   userid: {
     type: String,
-    required: true
+    required: true,
+    validate: [checkPolls, "Can only create one poll per user!"]
   }
 });
 
@@ -46,6 +47,10 @@ pollSchema.methods.getVotes = function(){
 
 function arrayValidate(array) {
   return array.length <= 4;
+}
+
+function checkPolls() {
+  
 }
 
 

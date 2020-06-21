@@ -16,6 +16,9 @@ var Poll = require('../models/poll');
 var redditjs = require('../api/reddit');
 const { assert } = require("chai");
 
+//Controllers
+var pollController = require('../controller/pollController')
+
 var app = require('express')();
 require("../config/passport")(passport);
 // Passport Setup
@@ -102,7 +105,6 @@ describe("Testing models", async function() {
       var poll = new Poll();
       poll.name = "Test Poll";
       poll.postId = "yhhwhbifhui";
-      poll.userid = "testid"
       poll.answersAmount = 4;
       poll.userid = "user_id";
 
@@ -134,7 +136,30 @@ describe("Testing models", async function() {
 
       assert.ok(done, "Poll has no errors");
     });
-  });
+
+    it('Post cannot have multiple polls from the same user', async function() {
+      var poll = new Poll();
+      poll.name = "Poll 1";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+    });
+
+      var poll2 = new Poll();
+      poll.name = "Poll 2";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+    });
+
+    var done = false;
+    await Poll.create([poll, poll2], function(err, doc) {
+      if(err){
+        done = true;
+      }
+
+      assert.ok(done, "Poll has no errors")
+    })
   
   describe("test redditjs", function() {
     it("GetHomePage should not be null", function(done) {
@@ -143,6 +168,5 @@ describe("Testing models", async function() {
       done();
     });
   });
-
 });
 
