@@ -30,6 +30,14 @@ app.use(flash());
 // load our routes and pass in our app and fully configured passport
 require('../routes/routes.js')(app, passport); 
 
+describe('Testing reddit api', async function(){
+  it('getHomePage should return object with filled array', async function(){
+    await redditjs.getHomepage().then(data => {
+      expect(data).not.empty;
+    })
+  });
+});
+
 describe('Testing poll routes', function(){
   describe('without params', function(){
     it('should return an object', function(done){

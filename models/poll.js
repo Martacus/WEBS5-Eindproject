@@ -50,7 +50,12 @@ function arrayValidate(array) {
 }
 
 function checkPolls() {
-  
+  var posts = findByPost(this.postId);
+  if(posts.length > 1){
+    return false;
+  } else {
+    return true;
+  }
 }
 
 
