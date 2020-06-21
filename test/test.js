@@ -36,6 +36,12 @@ describe('Testing reddit api', async function(){
       expect(data).not.empty;
     })
   });
+
+  it("getPost should return a post", async function () {
+    await redditjs.getPost("t3_hd213b").then((data) => {
+      console.log(data);
+    });
+  });
 });
 
 describe('Testing poll routes', function(){
@@ -91,7 +97,7 @@ describe("Testing models", async function() {
     });
   });
 
-  describe('test polls', function(){
+  describe("test polls", function () {
     it("Saving a poll should not error", function (done) {
       var poll = new Poll();
       poll.name = "Testing Poll";
@@ -109,7 +115,7 @@ describe("Testing models", async function() {
       done();
     });
 
-    it("should not error", function(done) {
+    it("should not error", function (done) {
       var poll = new Poll();
       poll.name = "Test Poll";
       poll.postId = "yhhwhbifhui";
@@ -121,23 +127,43 @@ describe("Testing models", async function() {
       done();
     });
 
-    it('Poll cannot have more than 4 answers', async function () {
+    it("Poll cannot have more than 4 answers", async function () {
       var model = {
         name: "Test Poll",
         postId: "testid",
-        userid:"user_id",
+        userid: "user_id",
         answers: [
-          new Answer({ answer: "Answer 1", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" }),
-          new Answer({ answer: "Answer 2", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" }),
-          new Answer({ answer: "Answer 3", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" }),
-          new Answer({ answer: "Answer 4", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" }),
-          new Answer({ answer: "Answer 5", votes: 0, pollId: "71f0f0fa-2cca-4658-8565-882970330967" })
-        ]
+          new Answer({
+            answer: "Answer 1",
+            votes: 0,
+            pollId: "71f0f0fa-2cca-4658-8565-882970330967",
+          }),
+          new Answer({
+            answer: "Answer 2",
+            votes: 0,
+            pollId: "71f0f0fa-2cca-4658-8565-882970330967",
+          }),
+          new Answer({
+            answer: "Answer 3",
+            votes: 0,
+            pollId: "71f0f0fa-2cca-4658-8565-882970330967",
+          }),
+          new Answer({
+            answer: "Answer 4",
+            votes: 0,
+            pollId: "71f0f0fa-2cca-4658-8565-882970330967",
+          }),
+          new Answer({
+            answer: "Answer 5",
+            votes: 0,
+            pollId: "71f0f0fa-2cca-4658-8565-882970330967",
+          }),
+        ],
       };
 
       var done = false;
       await Poll.create(model, function (err, poll) {
-        if(err){
+        if (err) {
           done = true;
         }
       });
@@ -145,29 +171,29 @@ describe("Testing models", async function() {
       assert.ok(done, "Poll has no errors");
     });
 
-    it('Post cannot have multiple polls from the same user', async function() {
+    it("Post cannot have multiple polls from the same user", async function () {
       var poll = new Poll();
       poll.name = "Poll 1";
       poll.postId = "yhhwhbifhui";
       poll.answersAmount = 4;
       poll.userid = "user_id";
-    });
 
       var poll2 = new Poll();
       poll.name = "Poll 2";
       poll.postId = "yhhwhbifhui";
       poll.answersAmount = 4;
       poll.userid = "user_id";
+
+      var done = false;
+      await Poll.create([poll, poll2], function (err, doc) {
+        if (err) {
+          done = true;
+        }
+
+        assert.ok(done, "Poll has no errors");
+      });
     });
-
-    var done = false;
-    await Poll.create([poll, poll2], function(err, doc) {
-      if(err){
-        done = true;
-      }
-
-      assert.ok(done, "Poll has no errors")
-    })
+  });
   
   describe("test redditjs", function() {
     it("GetHomePage should not be null", function(done) {

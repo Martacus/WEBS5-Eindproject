@@ -3,13 +3,10 @@ var Answer = require("../models/answer");
 const { use } = require("chai");
 
 module.exports.newPoll = function(data, user){
-  console.log(user);
-
   var poll = new Poll();
   poll.name = data.postTitle;
   poll.postId = data.postId;
   poll.userid = user._id;
-  console.log('here1');
 
   var culledAnswers = [];
   data.answers.forEach(answer => {
