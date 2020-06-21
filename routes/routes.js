@@ -198,7 +198,6 @@ module.exports = function (app, passport) {
 };
 
 function handleRoute(data, view, req, res, sendData){
-  console.log("hero");
   if (req.headers.type === "json") {
     res.json(data);
   } else {
@@ -208,6 +207,9 @@ function handleRoute(data, view, req, res, sendData){
 }
 
 function isLoggedIn(req, res, next) {
+  if (req.headers.type === "json") {
+    return next();
+  }
   if (req.isAuthenticated()) {
     req.isLogged = true
     return next();
