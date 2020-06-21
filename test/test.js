@@ -17,7 +17,8 @@ var redditjs = require('../api/reddit');
 const { assert } = require("chai");
 
 //Controllers
-var pollController = require('../controller/pollController')
+var pollController = require('../controller/pollController');
+const poll = require("../models/poll");
 
 var app = require('express')();
 require("../config/passport")(passport);
@@ -121,6 +122,21 @@ describe("Testing models", async function() {
       expect(error.message).to.not.be.undefined;
       done();
     });
+
+    it("Save answer", async (done) => {
+      const answer = new Answer();
+      answer.answer = 'Answer1'
+      answer.votes = 0;
+      answer.pollId = '71f0f0fa-2cca-4658-8565-882970330967'
+
+      answer.save();
+
+      expect(Answer.findById(answer.answerId)).to.not.be.undefined;
+
+      Answer.deleteOne({answerId: answer.answerId})
+
+      done();
+    })
   });
 
   describe("test polls", function () {
@@ -197,7 +213,19 @@ describe("Testing models", async function() {
       assert.ok(done, "Poll has no errors");
     });
 
-    
+    it('Get a poll by user', async (done) => {
+      var poll = new Poll();
+      poll.name = "Test Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+
+      poll.save();
+      
+      expect(pollController.getPollByUser(poll.userid, poll.pollId)).to.not.be.undefined;
+      Poll.deleteOne({ pollId: poll.pollId });
+      done();
+    })
   });
   
   describe("test redditjs", function() {
