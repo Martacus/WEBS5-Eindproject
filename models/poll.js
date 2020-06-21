@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var uuid = require("uuid");
 var Answer = require('./answer');
+const user = require('./user');
 
 var pollSchema = mongoose.Schema({
   pollId: {
@@ -23,8 +24,7 @@ var pollSchema = mongoose.Schema({
   },
   userid: {
     type: String,
-    required: true,
-    validate: [checkPolls, "Can only create one poll per user!"]
+    required: true
   }
 });
 
@@ -35,6 +35,19 @@ pollSchema.statics.findByUUID = function(uuid){
 pollSchema.statics.findByPost = function(_postId){
   return this.find({postId: _postId});
 }
+
+pollSchema.statics.findByPostAndUser = function (_postId, userid) {
+  return this.find({ postId: _postId, userid: userid });
+};
+
+pollSchema.methods.validateAuthenticity = function (userid, postid) {
+  var posts = this.find({ postId: postid, userid: userid });
+  if (posts.length > 1) {
+    return false;
+  } else {
+    return true;
+  }
+};
 
 pollSchema.methods.getVotes = function(){
   var votes = 0;
@@ -49,14 +62,7 @@ function arrayValidate(array) {
   return array.length <= 4;
 }
 
-function checkPolls() {
-  var posts = findByPost(this.postId);
-  if(posts.length > 1){
-    return false;
-  } else {
-    return true;
-  }
-}
+
 
 
 module.exports = mongoose.model('Poll', pollSchema);

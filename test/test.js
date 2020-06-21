@@ -59,16 +59,22 @@ describe('Testing reddit api', async function(){
 
   it("getPost should return a post", async function () {
     await redditjs.getPost("t3_hd213b").then((data) => {
-      console.log(data);
+      expect(data).to.not.be.undefined;
+    });
+  });
+
+  it("getPost should not return a post", async function () {
+    await redditjs.getPost("t3_hd213bygjfhgjfjgf").then((data) => {
+      expect(data).to.be.string;
     });
   });
 });
 
-describe('Testing poll routes', function(){
-  describe('without params', function(){
-    it('should return an object', function(done){
+describe("Testing poll routes", function () {
+  describe("without params", function () {
+    it("should return an object", function (done) {
       chai
-        .request('http://localhost:3000')
+        .request("http://localhost:3000")
         .get("/poll")
         .set("type", "json")
         .end((err, res) => {
@@ -81,7 +87,7 @@ describe('Testing poll routes', function(){
           done();
         });
     });
-  })
+  });
 });
 
 describe("Testing models", async function() {
@@ -191,28 +197,7 @@ describe("Testing models", async function() {
       assert.ok(done, "Poll has no errors");
     });
 
-    it("Post cannot have multiple polls from the same user", async function () {
-      var poll = new Poll();
-      poll.name = "Poll 1";
-      poll.postId = "yhhwhbifhui";
-      poll.answersAmount = 4;
-      poll.userid = "user_id";
-
-      var poll2 = new Poll();
-      poll.name = "Poll 2";
-      poll.postId = "yhhwhbifhui";
-      poll.answersAmount = 4;
-      poll.userid = "user_id";
-
-      var done = false;
-      await Poll.create([poll, poll2], function (err, doc) {
-        if (err) {
-          done = true;
-        }
-
-        assert.ok(done, "Poll has no errors");
-      });
-    });
+    
   });
   
   describe("test redditjs", function() {
