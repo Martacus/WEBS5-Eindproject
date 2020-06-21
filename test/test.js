@@ -68,25 +68,6 @@ describe("Testing poll routes", function () {
         });
     });
   });
-
-  describe("test poll rules", async function () {
-    it("Post cannot have multiple polls from the same user", async function () {
-      try {
-         await pollController.newPoll(
-           {
-             name: "Poll Test 1",
-             postId: "post_test_id",
-             answersAmount: 4,
-             userid: "5eef232f34aa2c57f0a9666c",
-             answers: ["Answer 2", "Answer 3", "Answer 4", "Answer 1"],
-           },
-           { _id: "5eef232f34aa2c57f0a9666c" }
-         );
-      } catch (err) {
-        console.log(err);
-      }
-    });
-  });
 });
 
 describe("Testing models", async function() {
