@@ -8,12 +8,10 @@ module.exports = function (app, passport) {
     // =====================================
     // FACEBOOK ROUTES =====================
     // =====================================
-    // route for facebook authentication and login
     app.get('/auth/facebook', passport.authenticate('facebook', { 
       scope : ['public_profile', 'email']
     }));
 
-    // handle the callback after facebook has authenticated the user
     app.get('/auth/facebook/callback',
       passport.authenticate('facebook', {
         successRedirect : '/profile',
@@ -23,12 +21,8 @@ module.exports = function (app, passport) {
     // =====================================
     // GOOGLE ROUTES =======================
     // =====================================
-    // send to google to do the authentication
-    // profile gets us their basic information including their name
-    // email gets their emails
     app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
 
-    // the callback after google has authenticated the user
     app.get('/auth/google/callback',
       passport.authenticate('google', {
         successRedirect : '/profile',
@@ -43,8 +37,8 @@ module.exports = function (app, passport) {
   // ===================================== 
   // SOCK ================================
   // =====================================  
-  app.get("/socket", function(req, res) {
-    res.render("socket.ejs");
+  app.get("/socket", isLoggedIn, function(req, res) {
+    res.render("polls/socket.ejs");
   });
 
 
@@ -58,14 +52,11 @@ module.exports = function (app, passport) {
   // =====================================
   // LOGIN ===============================
   // =====================================
-  // show the login form
-  app.get('/login', function (req, res) {
 
-    // render the page and pass in any flash data if it exists
-    res.render('login.ejs', { message: req.flash('loginMessage') });
+  app.get('/login', function (req, res) {
+    res.render('auth/login.ejs', { message: req.flash('loginMessage') }); 
   });
 
-  // process the login form
   app.post('/login', passport.authenticate('local-login', {
     successRedirect: '/home', 
     failureRedirect: '/login', 
@@ -75,28 +66,23 @@ module.exports = function (app, passport) {
   // =====================================
   // SIGNUP ==============================
   // =====================================
-  // show the signup form
   app.get('/signup', function (req, res) {
-
-    // render the page and pass in any flash data if it exists
-    res.render('signup.ejs', { message: req.flash('signupMessage') });
+    res.render('auth/signup.ejs', { message: req.flash('signupMessage') });
   });
 
-  // process the signup form
+
   app.post('/signup', passport.authenticate('local-signup', {
-    successRedirect: '/home', // redirect to the secure profile section
-    failureRedirect: '/signup', // redirect back to the signup page if there is an error
-    failureFlash: true // allow flash messages
+    successRedirect: '/home',
+    failureRedirect: '/signup',
+    failureFlash: true
   }));
 
   // =====================================
   // PROFILE SECTION =====================
   // =====================================
-  // we will want this protected so you have to be logged in to visit
-  // we will use route middleware to verify this (the isLoggedIn function)
   app.get('/profile', isLoggedIn, function (req, res) {
-    res.render('profile.ejs', {
-      user: req.user // get the user out of session and pass to template
+    res.render('polls/profile.ejs', {
+      user: req.user
     });
   });
 
@@ -111,9 +97,9 @@ module.exports = function (app, passport) {
   // =====================================
   // HOME ================================
   // =====================================
-  app.get('/home', function (req, res) {
+  app.get('/home', isLoggedIn, function (req, res) {
     redditAPI.getHomepage().then(function(data) {
-      handleRoute(data, "home.ejs", req.headers, res, { posts: data });
+      handleRoute(data, "polls/home.ejs", req, res, { posts: data });
     });
   });
 
@@ -121,33 +107,38 @@ module.exports = function (app, passport) {
   // =====================================
   // POSTS ===============================
   // =====================================
-  app.get('/post/:postid', function(req, res){
+  app.get('/post/:postid', isLoggedIn, function(req, res){
     redditAPI.getPost(req.params.postid).then(function(data){
       pollController.getPostPolls(data.name).then(function(pollData) {
         data.polls = pollData;
-        handleRoute(data, "post.ejs", req.headers, res, { post: data });
+        data.user = req.user;
+        handleRoute(data, "polls/post.ejs", req, res, { post: data });
       });
     });
   });
 
   // ===================================== 
   // POLLS ===============================
-  // =====================================
+  // ===================================== 
   app.get('/poll/:pollid', function(req, res){
     pollController.getPoll({ pollId: req.params.pollid }).then(function(data) {
-      handleRoute(data, "poll.ejs", req.headers, res, { poll: data });
+      handleRoute(data, "polls/poll.ejs", req, res, { poll: data });
     });
+  });
+
+  app.get('/poll/create/:postid', isLoggedIn, function (req, res) {
+    handleRoute({ post: { postid: req.params.postid } }, "polls/create.ejs", req, res, { post: {postid: req.params.postid} });
   });
 
   app.get("/poll", function(req, res) {
     pollController.getPoll(req.query).then(function(data) {
-      handleRoute(data, "poll.ejs", req.headers, res, { poll: data });
+      handleRoute(data, "polls/poll.ejs", req, res, { poll: data });
     });
   });
 
   app.post('/poll', function(req, res){
-    pollController.newPoll(req.body);
-    res.end();
+    pollController.newPoll(req.body, req.user);
+    res.redirect('/post/' + req.body.postId);
   });
 
   // ===================================== 
@@ -155,7 +146,7 @@ module.exports = function (app, passport) {
   // =====================================
   app.get('/poll/:pollid/answer/:answerid', function(req, res){
     pollController.getAnswer({ pollId: req.params.pollid, answerId: req.params.answerid }).then(function(data){
-      handleRoute(data, 'answer.ejs', req.headers, res, {answer: data});
+      handleRoute(data, 'answer.ejs', req, res, {answer: data});
     });
   });
 
@@ -171,28 +162,25 @@ module.exports = function (app, passport) {
     pollController
       .getAnswer(req.query)
       .then(function(data) {
-        handleRoute(data, "answer.ejs", req.headers, res, { answer: data });
+        handleRoute(data, "answer.ejs", req, res, { answer: data });
       });
   });
 };
 
-
-//Handles routes by json or html
-function handleRoute(data, view, headers, res, sendData){
-  if (headers.type === "json") {
+function handleRoute(data, view, req, res, sendData){
+  console.log("hero");
+  if (req.headers.type === "json") {
     res.json(data);
   } else {
+    sendData.loggedIn = req.isLogged;
     res.render(view, sendData);
   }
 }
 
-// route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-
-  // if user is authenticated in the session, carry on 
-  if (req.isAuthenticated())
+  if (req.isAuthenticated()) {
+    req.isLogged = true
     return next();
-
-  // if they aren't redirect them to the home page
+  }
   res.redirect('/');
 }

@@ -27,7 +27,7 @@ app.use(express.static(__dirname + 'public'));
 app.use(morgan('dev'));
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(bodyParser());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -37,7 +37,6 @@ app.use(session({ secret: 'ilovescotchscotchyscotchscotch' }))
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-
 // load our routes and pass in our app and fully configured passport
 require('./routes/routes.js')(app, passport); 
 

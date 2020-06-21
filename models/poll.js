@@ -2,8 +2,6 @@ var mongoose = require('mongoose');
 var uuid = require("uuid");
 var Answer = require('./answer');
 
-
-
 var pollSchema = mongoose.Schema({
   pollId: {
     type: String,
@@ -19,11 +17,10 @@ var pollSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  answersAmount: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 4
+  answers: [Answer.schema],
+  userid: {
+    type: String,
+    required: true
   }
 });
 

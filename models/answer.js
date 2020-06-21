@@ -1,6 +1,5 @@
 var mongoose = require("mongoose");
 var uuid = require("uuid");
-//uuid.v4();
 
 var answerSchema = mongoose.Schema({
   answerId: {

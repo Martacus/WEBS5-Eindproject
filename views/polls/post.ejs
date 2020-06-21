@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../partial/header %>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href="/poll/create/<%= post.name %>" class="btn btn-success">Create Poll</a>
+      </div>
+      
+    </div>
+    <div class="row">
+      <% for (var i = 0; i < post.polls.length; i++) { %>
+      <div class="col-md-6">
+        <div class="card post-card">
+          <div class="card-header">
+            <%= post.polls[i].name %> <a class="fa fa-link" href=""></a>
+          </div>
+          <div class="card-body">
+            <% for (var j = 0; j < post.polls[i].answers.length; j++) { %>
+              <div class="card post-card">
+                <div class="card-body">
+                  <p><%= post.polls[i].answers[j].answer %></p>
+                  <p>Votes: <%= post.polls[i].answers[j].votes %></p>
+                  <button class="btn btn-success">Vote</button>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</body>
+
+</html>
