@@ -2,6 +2,9 @@
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require("passport-facebook").Strategy;
 var GoogleStrategy = require("passport-google-oauth20");
+const passportJWT = require("passport-jwt");
+const JWTStrategy   = passportJWT.Strategy;
+const ExtractJWT = passportJWT.ExtractJwt;
 
 // load up the user model
 var User = require('../models/user');
@@ -166,5 +169,25 @@ module.exports = function (passport) {
               }
           });
       });
-  }));    
+  })); 
+  
+  // =========================================================================
+  // JWT ==================================================================
+  // =========================================================================
+  passport.use(new JWTStrategy({
+        jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+        secretOrKey   : 'watermelonlemon'
+    },
+    function (jwtPayload, cb) {
+
+        //find the user in db if needed. This functionality may be omitted if you store everything you'll need in JWT payload.
+        return UserModel.findOneById(jwtPayload.id)
+            .then(user => {
+                return cb(null, user);
+            })
+            .catch(err => {
+                return cb(err);
+            });
+    }
+));
 };

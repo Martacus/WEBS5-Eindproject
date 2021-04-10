@@ -2,6 +2,9 @@ var redditAPI = require('../api/reddit');
 var pollController = require("../controller/pollController");
 const specs = require("../config/swagger.js");
 const swaggerUi = require('swagger-ui-express');
+const jwt = require('jsonwebtoken');
+const passport = require('../config/passport');
+var User = require('../models/user');
 
 module.exports = function (app, passport) {
 
@@ -57,11 +60,24 @@ module.exports = function (app, passport) {
     res.render('auth/login.ejs', { message: req.flash('loginMessage') }); 
   });
 
-  app.post('/login', passport.authenticate('local-login', {
-    successRedirect: '/home', 
-    failureRedirect: '/login', 
-    failureFlash: true 
-  }));
+  app.post('/login', function (req, res, next) {
+    passport.authenticate('local-login', {session: true}, (err, user, info) => {
+        if (err || !user) {
+            return res.status(400).json({
+                message: 'Something is not right',
+                user   : user
+            });
+        }
+       req.login(user, {session: true}, (err) => {
+           if (err) {
+               res.send(err);
+           }
+           // generate a signed son web token with the contents of user object and return it in the response
+           const token= jwt.sign(user.toJSON(), 'watermelonlemon');
+           return res.json({user, token});
+        });
+    })(req, res);
+});
 
   // =====================================
   // SIGNUP ==============================
@@ -130,7 +146,7 @@ module.exports = function (app, passport) {
     handleRoute({ post: { postid: req.params.postid } }, "polls/create.ejs", req, res, { post: {postid: req.params.postid} });
   });
 
-  app.get("/poll", function(req, res) {
+  app.get("/poll", isLoggedIn, function(req, res) {
     pollController.getPoll(req.query).then(function(data) {
       handleRoute(data, "polls/poll.ejs", req, res, { poll: data });
     });
@@ -194,7 +210,25 @@ function handleRoute(data, view, req, res, sendData){
 
 function isLoggedIn(req, res, next) {
   if (req.headers.type === "json") {
-    return next();
+    var jwtToken = req.headers.authorization.split(" ")[1];
+    try {
+      var decoded = jwt.verify(jwtToken, 'watermelonlemon');
+      console.log(decoded._id);
+      return User.findById(decoded._id)
+            .then(user => {
+                return next();
+            })
+            .catch(err => {
+                return res.status(400).json({
+                  message: 'User not found'
+                });
+            }); 
+    } catch(err) {
+      return res.status(400).json({
+        message: 'JWT is not right',
+        err: err
+      });
+    }
   }
   if (req.isAuthenticated()) {
     req.isLogged = true

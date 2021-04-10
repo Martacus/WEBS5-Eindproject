@@ -139,7 +139,8 @@ describe("Testing models", async function() {
     })
   });
 
-  describe("test polls", function () {
+  describe("test polls", async function () {
+
     it("Saving a poll should not error", function (done) {
       var poll = new Poll();
       poll.name = "Testing Poll";
@@ -232,6 +233,13 @@ describe("Testing models", async function() {
     it("GetHomePage should not be null", function(done) {
       var homepageData = redditjs.getHomepage();
       expect(homepageData).to.not.be.undefined;
+      done();
+    });
+  });
+
+  describe("test poll controller", function () {
+    it("GetPollByUser should be empty", function (done) {
+      expect(pollController.getPollByUser("")).to.be.empty;
       done();
     });
   });

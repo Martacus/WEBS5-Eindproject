@@ -33,7 +33,7 @@ app.use(bodyParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Passport Setup
-app.use(session({ secret: 'ilovescotchscotchyscotchscotch' }))
+app.use(session({ secret: 'ilovewatermelon' }))
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());

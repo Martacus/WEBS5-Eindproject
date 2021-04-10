@@ -10,16 +10,6 @@ module.exports.newPoll = async function(data, user, callback){
     }
   });
 
-  if(polls.length > 0){
-    console.log("THIS IS ANAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-    if(typeof callback === 'function'){
-      callback({
-        error: "This user already has a poll under post: " + data.postId,
-      });
-    }
-    return;
-  }
-
   var poll = new Poll();
   poll.name = data.name;
   poll.postId = data.postId;

@@ -40,15 +40,6 @@ pollSchema.statics.findByPostAndUser = function (_postId, userid) {
   return this.find({ postId: _postId, userid: userid });
 };
 
-pollSchema.methods.validateAuthenticity = function (userid, postid) {
-  var posts = this.find({ postId: postid, userid: userid });
-  if (posts.length > 1) {
-    return false;
-  } else {
-    return true;
-  }
-};
-
 pollSchema.methods.getVotes = function(){
   var votes = 0;
   var answers = Answer.find({pollId: this.pollId});
