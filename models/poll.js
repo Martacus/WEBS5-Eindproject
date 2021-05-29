@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var uuid = require("uuid");
-var Answer = require('./answer');
+var Answer = require('./poll.answer');
 const user = require('./user');
 
 var pollSchema = mongoose.Schema({

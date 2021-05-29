@@ -1,5 +1,5 @@
 var Poll = require("../models/poll");
-var Answer = require("../models/answer");
+var Answer = require("../models/poll.answer");
 const { use } = require("chai");
 
 module.exports.newPoll = async function(data, user, callback){
@@ -44,8 +44,30 @@ module.exports.newPoll = async function(data, user, callback){
   })
 }
 
+getLimit = function(params){
+  const limit = parseInt(params.limit);
+  delete params.skip;
+  if(limit = undefined){
+    return 20;
+  }
+  return limit;
+}
+
+getSkip = function(params){
+  const skip = parseInt(params.skip);
+  delete params.limit;
+  if(skip == undefined){
+    return 0;
+  }
+  return skip;
+}
+
 module.exports.getPoll = async function(params) {
-  return await Poll.find(params);
+  const skip = getSkip(params);
+  const limit = getLimit(params);
+  console.log(skip);
+
+  return await Poll.find(params).skip(skip).limit(limit);
 };
 
 module.exports.getPollByUUID = async function(uuid){

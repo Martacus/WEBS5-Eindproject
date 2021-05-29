@@ -5,7 +5,9 @@ const swaggerUi = require('swagger-ui-express');
 const jwt = require('jsonwebtoken');
 const passport = require('../config/passport');
 var User = require('../models/user');
-
+var xml = require('xml');
+var convert = require('xml-js');
+var xmlify = require('xmlify');
 module.exports = function (app, passport) {
 
     // =====================================
@@ -147,6 +149,7 @@ module.exports = function (app, passport) {
   });
 
   app.get("/poll", isLoggedIn, function(req, res) {
+    console.log(req.query);
     pollController.getPoll(req.query).then(function(data) {
       handleRoute(data, "polls/poll.ejs", req, res, { poll: data });
     });
@@ -202,14 +205,18 @@ module.exports = function (app, passport) {
 function handleRoute(data, view, req, res, sendData){
   if (req.headers.type === "json") {
     res.json(data);
-  } else {
+  } else if (req.headers.type === "xml"){
+    var xmll = xmlify(data);
+    res.set('Content-Type', 'text/xml');
+    res.send(xml(xmll));
+  }else {
     sendData.loggedIn = req.isLogged;
     res.render(view, sendData);
   }
 }
 
 function isLoggedIn(req, res, next) {
-  if (req.headers.type === "json") {
+  if (req.headers.type === "json" || req.headers.type === "xml") {
     var jwtToken = req.headers.authorization.split(" ")[1];
     try {
       var decoded = jwt.verify(jwtToken, 'watermelonlemon');
@@ -225,7 +232,7 @@ function isLoggedIn(req, res, next) {
             }); 
     } catch(err) {
       return res.status(400).json({
-        message: 'JWT is not right',
+        message: 'JWT not found',
         err: err
       });
     }
