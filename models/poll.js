@@ -40,14 +40,6 @@ pollSchema.statics.findByPostAndUser = function (_postId, userid) {
   return this.find({ postId: _postId, userid: userid });
 };
 
-pollSchema.methods.getVotes = function(){
-  var votes = 0;
-  var answers = Answer.find({pollId: this.pollId});
-  for(var i = 0; i < answers.length; i++){
-    votes += answers[i].votes;
-  }
-  return votes;
-}
 
 function arrayValidate(array) {
   return array.length <= 4;

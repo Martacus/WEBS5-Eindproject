@@ -1,4 +1,4 @@
 module.exports = {
   url:
-    "mongodb+srv://Mart:MartSchool123!@cluster0-4sc7j.mongodb.net/test?retryWrites=true&w=majority"
+    "mongodb+srv://akshay:akshay@cluster0.4mppj.mongodb.net/webs5?retryWrites=true&w=majority"
 };

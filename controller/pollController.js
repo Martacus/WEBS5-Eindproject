@@ -3,13 +3,6 @@ var Answer = require("../models/poll.answer");
 const { use } = require("chai");
 
 module.exports.newPoll = async function(data, user, callback){
-  console.log("auokay")
-  var polls = await Poll.findByPostAndUser(data.postId, user._id).then((result) => {
-    if(result){
-      
-    }
-  });
-
   var poll = new Poll();
   poll.name = data.name;
   poll.postId = data.postId;
@@ -65,7 +58,6 @@ getSkip = function(params){
 module.exports.getPoll = async function(params) {
   const skip = getSkip(params);
   const limit = getLimit(params);
-  console.log(skip);
 
   return await Poll.find(params).skip(skip).limit(limit);
 };

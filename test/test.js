@@ -6,10 +6,11 @@ chai.use(chaiHttp);
 var passport = require("passport");
 var session = require("express-session");
 var flash = require("connect-flash");
+var request = require('chai').request;
 
 //Models
 var User = require('../models/user');
-var Answer = require('../models/answer');
+var Answer = require('../models/poll.answer');
 var Poll = require('../models/poll');
 
 //Reddit.js
@@ -31,7 +32,94 @@ app.use(flash());
 // load our routes and pass in our app and fully configured passport
 require('../routes/routes.js')(app, passport); 
 
-describe('Testing modules' ,async function() {
+describe('Testing routes', async function() {
+
+  it('Should login succesfully', function (done) {
+    request(app)
+    .post('/login')
+    .send({
+      email: 'akshay6@akshay6.nl',
+      password: 'akshay6'
+    })
+    .end((err, res) => {
+      if(err) { return done(err) }
+      console.log(res.error)
+    })
+    
+    done();
+  })
+
+
+  it("Route '/signup' should return a page", function (done) {
+    request(app)
+      .get("/signup")
+      .set("type", "json")
+      .end((err, res) => {
+        expect(err, "Error occured.").to.be.null;
+        expect(
+          res,
+          `Status was not 200, was ${res.status} instead`
+        ).to.have.status(200);
+        expect(res.body, "Body was null.").to.not.be.null;
+        done();
+      });
+  });
+
+  it("/signup should return a redirect", function (done) {
+    request(app)
+      .post("/signup")
+      .set("type", "json")
+      .send({
+        email: 'crackhead@crackhead.nl',
+        password: 'crackhead'
+      })  
+      .end((err, res) => {
+        expect(err, "Error occured.").to.be.null;
+        expect(
+          res,
+          `Status was not 200, was ${res.status} instead`
+        ).to.have.status(200);
+        expect(res.body, "Body was null.").to.not.be.null;
+        done();
+      });
+  });
+
+  it("Route '/login' should return a page", function (done) {
+    request(app)
+      .get("/login")
+      .set("type", "json")
+      .end((err, res) => {
+        expect(err, "Error occured.").to.be.null;
+        expect(
+          res,
+          `Status was not 200, was ${res.status} instead`
+        ).to.have.status(200);
+        expect(res.body, "Body was null.").to.not.be.null;
+        done();
+      });
+  });
+
+  it("Route /login should be status 200", function (done) {
+    request(app)
+      .post("/login")
+      .set("type", "json")
+      .send({
+        email: 'cracked@cracked.nl',
+        password: 'cracked'
+      })  
+      .end((err, res) => {
+        expect(err, "Error occured.").to.be.null;
+        expect(
+          res,
+          `Status was not 200, was ${res.status} instead`
+        ).to.have.status(200);
+        expect(res.body, "Body was null.").to.not.be.null;
+        done();
+      });
+  });
+})
+
+describe('Testing modules' ,async function() {  
   it('Poll has a module', () => {
     expect(Poll).to.not.be.undefined;
   });
@@ -46,7 +134,7 @@ describe('Testing modules' ,async function() {
 })
 
 describe('Testing users', async function(){
-  it('Has a module', () => {
+  it('User has a module', () => {
     expect(User).to.not.be.undefined;
   });
 })
@@ -71,25 +159,24 @@ describe('Testing reddit api', async function(){
   });
 });
 
-describe("Testing poll routes", function () {
-  describe("without params", function () {
-    it("should return an object", function (done) {
-      chai
-        .request("http://localhost:3000")
-        .get("/poll")
-        .set("type", "json")
-        .end((err, res) => {
-          expect(err, "Error occured.").to.be.null;
-          expect(
-            res,
-            `Status was not 200, was ${res.status} instead`
-          ).to.have.status(200);
-          expect(res.body, "Body was null.").to.not.be.null;
-          done();
-        });
-    });
-  });
-});
+// describe("Testing poll routes", function () {
+//   describe("without params", function () {
+//     it("should return an object", function (done) {
+//       request(app)
+//         .get("/poll")
+//         .set("type", "json")
+//         .end((err, res) => {
+//           expect(err, "Error occured.").to.be.null;
+//           expect(
+//             res,
+//             `Status was not 200, was ${res.status} instead`
+//           ).to.have.status(200);
+//           expect(res.body, "Body was null.").to.not.be.null;
+//           done();
+//         });
+//     });
+//   });
+// });
 
 describe("Testing models", async function() {
   describe("test answers", function() {
@@ -138,6 +225,135 @@ describe("Testing models", async function() {
       done();
     })
   });
+
+  describe("Testing Pollcontroller", async function() {
+
+    it("Should retrieve a list of polls", async (done) => {
+
+      var poll = new Poll();
+      poll.name = "Testing Poll";
+      poll.postId = "yhhwhbifhui14";
+      poll.answersAmount = 4;
+      poll.userid = "user_id2";
+
+      poll.save();
+
+      var poll1 = new Poll();
+      poll1.name = "Test Poll";
+      poll1.postId = "yhhwhbifhui";
+      poll1.answersAmount = 4;
+      poll1.userid = "user_id";
+
+      poll1.save();
+
+      expect(pollController.getPoll({limit: '15', skip: '0'})).to.not.be.undefined;
+
+      Poll.deleteOne({pollId: poll.pollId })
+      Poll.deleteOne({pollId: poll1.pollId })
+
+      done();
+
+    })
+
+    it("Should create a new poll", async function (done) {
+      var user = new User();
+      user.local = {email: 'test_user', password:'test123'}
+      user.role = 'user';
+      user.userId = 'test_user_123'
+      user.save();
+
+      expect(User.findById('test_user_123')).to.not.be.undefined;
+
+      var poll = new Poll();
+      poll.name = "Testing Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+
+      var answers = ['answer1', 'answer2', 'answer3', 'answer4'];
+      poll.answers = answers;
+
+      expect(pollController.newPoll(poll, user)).should('succes');
+      Poll.deleteOne({ pollId: poll.pollId });
+      User.deleteOne({userId: user.id});
+
+      done();
+    });
+
+    it("Should find poll based on UUID", async (done) => {
+      var poll = new Poll();
+      poll.name = "Test Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+
+      poll.save();
+      
+      expect(pollController.getPollByUUID(poll.pollId)).to.not.be.undefined;
+      Poll.deleteOne({ pollId: poll.pollId });
+      done();
+    });
+
+    it("Should find poll based on user", async (done) => {
+      var poll = new Poll();
+      poll.name = "Test Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+
+      poll.save();
+      
+      expect(pollController.getPollByUser(poll.user_id, poll.pollId)).to.not.be.undefined;
+      Poll.deleteOne({ pollId: poll.pollId });
+      done();
+    });
+
+    it("Should find polls based on user", async (done) => {
+      var poll = new Poll();
+      poll.name = "Test Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+
+      poll.save();
+      
+      expect(pollController.getPollsByUser(poll.user_id)).to.not.be.undefined;
+      Poll.deleteOne({ pollId: poll.pollId });
+      done();
+    });
+
+    it("Should find polls based on postId", async (done) => {
+      var poll = new Poll();
+      poll.name = "Test Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+
+      poll.save();
+      
+      expect(pollController.getPostPolls(poll.postId)).to.not.be.undefined;
+      Poll.deleteOne({ pollId: poll.pollId });
+      done();
+    });
+
+    it("Should get votes based on pollid", async (done) => {
+      var poll = new Poll();
+      poll.name = "Test Poll";
+      poll.postId = "yhhwhbifhui";
+      poll.answersAmount = 4;
+      poll.userid = "user_id";
+
+      poll.save();
+      var response = pollController.getAnswer(poll.pollId)
+      expect(response).to.not.be.undefined;
+      
+      Poll.deleteOne({ pollId: poll.pollId });
+      done();
+    });
+
+
+
+  })
 
   describe("test polls", async function () {
 

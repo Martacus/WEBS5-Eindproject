@@ -63,15 +63,17 @@ module.exports = function (app, passport) {
   });
 
   app.post('/login', function (req, res, next) {
+    console.log(req)
     passport.authenticate('local-login', {session: true}, (err, user, info) => {
         if (err || !user) {
             return res.status(400).json({
                 message: 'Something is not right',
-                user   : user
+                user   : user,
+                error : err
             });
         }
        req.login(user, {session: true}, (err) => {
-           if (err) {
+           if (err) { 
                res.send(err);
            }
            // generate a signed son web token with the contents of user object and return it in the response
@@ -149,7 +151,6 @@ module.exports = function (app, passport) {
   });
 
   app.get("/poll", isLoggedIn, function(req, res) {
-    console.log(req.query);
     pollController.getPoll(req.query).then(function(data) {
       handleRoute(data, "polls/poll.ejs", req, res, { poll: data });
     });
@@ -220,7 +221,6 @@ function isLoggedIn(req, res, next) {
     var jwtToken = req.headers.authorization.split(" ")[1];
     try {
       var decoded = jwt.verify(jwtToken, 'watermelonlemon');
-      console.log(decoded._id);
       return User.findById(decoded._id)
             .then(user => {
                 return next();
