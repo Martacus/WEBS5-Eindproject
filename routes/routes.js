@@ -63,13 +63,12 @@ module.exports = function (app, passport) {
   });
 
   app.post('/login', function (req, res, next) {
-    console.log(req)
     passport.authenticate('local-login', {session: true}, (err, user, info) => {
+      console.log(user);
         if (err || !user) {
             return res.status(400).json({
                 message: 'Something is not right',
                 user   : user,
-                error : err
             });
         }
        req.login(user, {session: true}, (err) => {

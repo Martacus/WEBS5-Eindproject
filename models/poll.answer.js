@@ -12,7 +12,7 @@ var answerSchema = mongoose.Schema({
   answer: {
     type: String,
     required: true,
-    maxlength: "50"
+    maxlength: "200"
   },
   votes: {
     type: Number,

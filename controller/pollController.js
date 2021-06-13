@@ -79,8 +79,8 @@ module.exports.getPollsByUser = async function (userId) {
 }
 
 module.exports.getAnswer = async function(query) {
-  var answer = {};
   await Poll.find({ pollId: query.pollId }, function(err, doc) {
+    console.log(query)
     if (doc.length) {
       answer = Answer.find({ answerId: query.answerId });
     } else {
@@ -90,7 +90,8 @@ module.exports.getAnswer = async function(query) {
   return answer;
 };
 
-module.exports.getVotes = async function(pollId) {
-  var poll = await Poll.find({pollId: query.pollId});
-  return { votes: poll.getVotes() };
-}
+// module.exports.getVotes = async function(pollId) {
+//   console.log("HIER KOM IK")
+//   var poll = await Poll.find({pollId: query.pollId});
+//   return { votes: poll.getVotes() };
+// }
