@@ -94,9 +94,12 @@ module.exports.getAnswer = async function(query) {
 module.exports.addVotes = async function(query){
   var pollArray = await Poll.find({pollId: query.params.pollid});
   var poll = pollArray[0];
-  console.log( query.user)
+  console.log(query.params);
+  console.log(query.user);
   if(poll != undefined && poll.answers != undefined){
-    console.log("komt")
+    if(alreadyVoted(poll, query.user._id)){
+      return false;
+    }
     poll.answers.forEach(function(s){
       if(s.answerId == query.params.answerid){
         var vote = new Vote();
@@ -106,8 +109,24 @@ module.exports.addVotes = async function(query){
         poll.save();
       }
     })
+    return true;
   }
-  return { error: "Poll not found" };
+  return false;
+}
+
+function alreadyVoted(poll, userId){
+  var voted = false;
+  poll.answers.forEach(function(s){
+    s.votes.forEach(function(vote){
+      console.log(vote)
+      console.log(userId)
+        if(vote.userId == userId){
+          console.log("trueee")
+          voted = true;
+        }
+    })
+  })
+  return voted;
 }
 
 module.exports.getVotes = async function(query) {

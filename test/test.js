@@ -275,6 +275,92 @@ describe("Testing Pollcontroller", async function() {
     done();
   });
 
+  it("A person cant vote more than once on a poll", async (done) => {
+    var poll = new Poll();
+    poll.name = "Test Poll";
+    poll.postId = "yhhwhbifhui";
+    poll.answersAmount = 4;
+    poll.userid = "user_id";
+    poll.answers = [];
+
+    var answer = new Answer();
+    answer.answer = 'Answer1'
+    answer.pollId = '71f0f0fa-2cca-4658-8565-8829'
+    poll.answers.push(answer);
+
+    var answer2 = new Answer();
+    answer.answer = 'Answer2'
+    answer.pollId = '71f0f0fa-2cca-4658-8565-8839'
+    poll.answers.push(answer2);
+
+    poll.save();
+    var query = {
+      params: {
+        pollid: poll.pollId,
+        answerId: answer.answerId
+      },
+      user: { 
+        local: {
+          email: 'martvdham@gmail.com',
+          password: '$2a$08$GgLIh96XNCZz4FILOP4F.up6E/31kmJpEP63W7uG5Upg9T7ED9Nc2'
+        },
+        _id:"60c646df963de09794c8db9e",
+        role: 'admin',
+        __v: 0
+      }
+    };
+
+    pollController.addVotes(query);
+
+    var response = pollController.addVotes(query).then(function(data){
+      expect(data).to.be.false;
+    });
+   
+    Poll.deleteOne({ pollId: poll.pollId });
+    done();
+  });
+
+  it("A person can vote", async (done) => {
+    var poll = new Poll();
+    poll.name = "Test Poll";
+    poll.postId = "yhhwhbifhui";
+    poll.answersAmount = 4;
+    poll.userid = "user_id";
+    poll.answers = [];
+
+    var answer = new Answer();
+    answer.answer = 'Answer1'
+    answer.pollId = '71f0f0fa-2cca-4658-8565-8829'
+    poll.answers.push(answer);
+
+    var answer2 = new Answer();
+    answer.answer = 'Answer2'
+    answer.pollId = '71f0f0fa-2cca-4658-8565-8839'
+    poll.answers.push(answer2);
+
+    poll.save();
+    var query = {
+      params: {
+        pollid: poll.pollId,
+        answerId: answer.answerId
+      },
+      user: { 
+        local: {
+          email: 'martvdham@gmail.com',
+          password: '$2a$08$GgLIh96XNCZz4FILOP4F.up6E/31kmJpEP63W7uG5Upg9T7ED9Nc2'
+        },
+        _id:"60c646df963de09794c8db9e",
+        role: 'admin',
+        __v: 0
+      }
+    };
+    var response = pollController.addVotes(query).then(function(data){
+      expect(data).to.be.true;
+    });
+   
+    Poll.deleteOne({ pollId: poll.pollId });
+    done();
+  });
   // describe("POST /login", () => {
   //   before(function(done) {
   //     var user = new User();

@@ -203,8 +203,20 @@ module.exports = function (app, passport) {
   // Votes =============================
   // =====================================
   app.post('/poll/:pollid/answer/:answerid/vote', isLoggedIn, function(req, res){
-    pollController.addVotes({request: req.body, user: req.user, params: req.params});
-    res.redirect('/post/' + req.body.postId);
+    console.log("=========");
+    var worked = false;
+    pollController.addVotes({request: req.body, user: req.user, params: req.params}).then(function(promise){
+     worked = promise;
+      if(!promise){
+        res.json({
+          error: "You already voted for this poll."
+        })
+      } else {
+        res.redirect('/post/' + req.body.postId);
+        next();
+      }
+    });
+    
   });
 
   app.get("/poll/:pollid/answer/:answerid/vote/:voteid", isLoggedIn, function(req, res) {
