@@ -1,5 +1,6 @@
 var Poll = require("../models/poll");
 var Answer = require("../models/poll.answer");
+var Vote = require("../models/poll.answer.vote");
 const { use } = require("chai");
 
 module.exports.newPoll = async function(data, user, callback){
@@ -90,8 +91,53 @@ module.exports.getAnswer = async function(query) {
   return answer;
 };
 
-// module.exports.getVotes = async function(pollId) {
-//   console.log("HIER KOM IK")
-//   var poll = await Poll.find({pollId: query.pollId});
-//   return { votes: poll.getVotes() };
-// }
+module.exports.addVotes = async function(query){
+  var pollArray = await Poll.find({pollId: query.params.pollid});
+  var poll = pollArray[0];
+  console.log( query.user)
+  if(poll != undefined && poll.answers != undefined){
+    console.log("komt")
+    poll.answers.forEach(function(s){
+      if(s.answerId == query.params.answerid){
+        var vote = new Vote();
+        vote.userId = query.user._id;
+        s.votes.push(vote);
+        vote.save();
+        poll.save();
+      }
+    })
+  }
+  return { error: "Poll not found" };
+}
+
+module.exports.getVotes = async function(query) {
+  var pollArray = await Poll.find({pollId: query.pollId});
+  var poll = pollArray[0];
+  var votes = {};
+  if(poll != undefined && poll.answers != undefined){
+    poll.answers.forEach(function(s){
+      if(s.answerId == query.answerId){
+        votes = s.votes;
+      }
+    })
+  }
+  return votes;
+}
+
+module.exports.getVote = async function(query) {
+  var pollArray = await Poll.find({pollId: query.pollId});
+  var poll = pollArray[0];
+  var foundVote = {};
+  if(poll != undefined && poll.answers != undefined){
+    poll.answers.forEach(function(s){
+      if(s.answerId == query.answerId){
+        s.votes.forEach(function(vote){
+          if(vote.voteId == query.voteId){
+            foundVote = vote
+          }
+        })
+      }
+    })
+  }
+  return foundVote;
+}

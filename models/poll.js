@@ -47,5 +47,4 @@ function arrayValidate(array) {
 
 
 
-
 module.exports = mongoose.model('Poll', pollSchema);

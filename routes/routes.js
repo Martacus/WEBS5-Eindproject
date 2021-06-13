@@ -64,10 +64,9 @@ module.exports = function (app, passport) {
 
   app.post('/login', function (req, res, next) {
     passport.authenticate('local-login', {session: true}, (err, user, info) => {
-      console.log(user);
         if (err || !user) {
             return res.status(400).json({
-                message: 'Something is not right',
+                message: 'Could not find any user with this account',
                 user   : user,
             });
         }
@@ -193,9 +192,24 @@ module.exports = function (app, passport) {
     });
   });
 
-  app.get("/poll/:pollid/answer/:answerid/votes", function(req, res) {
+  app.get("/poll/:pollid/answer/:answerid/votes", isLoggedIn, function(req, res) {
     pollController
       .getVotes({ pollId: req.params.pollid, answerId: req.params.answerid })
+      .then(function(data) {
+        res.json(data);
+    });
+  });
+  // ===================================== 
+  // Votes =============================
+  // =====================================
+  app.post('/poll/:pollid/answer/:answerid/vote', isLoggedIn, function(req, res){
+    pollController.addVotes({request: req.body, user: req.user, params: req.params});
+    res.redirect('/post/' + req.body.postId);
+  });
+
+  app.get("/poll/:pollid/answer/:answerid/vote/:voteid", isLoggedIn, function(req, res) {
+    pollController
+      .getVote({ pollId: req.params.pollid, answerId: req.params.answerid, voteId: req.params.voteid })
       .then(function(data) {
         res.json(data);
     });

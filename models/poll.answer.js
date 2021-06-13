@@ -1,5 +1,6 @@
 var mongoose = require("mongoose");
 var uuid = require("uuid");
+var Vote = require('./poll.answer.vote');
 
 var answerSchema = mongoose.Schema({
   answerId: {
@@ -15,10 +16,8 @@ var answerSchema = mongoose.Schema({
     maxlength: "200"
   },
   votes: {
-    type: Number,
-    default: 0,
-    required: true,
-    min: 0
+    type: [Vote.schema],
+    required: false
   },
   pollId: {
     type: String,
